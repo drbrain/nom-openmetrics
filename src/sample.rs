@@ -1,12 +1,12 @@
 use crate::Label;
 
 #[derive(Debug, PartialEq)]
-pub struct Metric<'a> {
+pub struct Sample<'a> {
     name: &'a str,
     labels: Vec<Label<'a>>,
 }
 
-impl<'a> Metric<'a> {
+impl<'a> Sample<'a> {
     pub fn new(name: &'a str) -> Self {
         let labels = vec![];
 

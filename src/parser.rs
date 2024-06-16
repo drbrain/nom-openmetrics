@@ -2,7 +2,7 @@ mod label;
 mod metric_name;
 mod number;
 
-use crate::Metric;
+use crate::Sample;
 pub use label::labels;
 pub use metric_name::metric_name;
 use nom::{
@@ -13,14 +13,14 @@ use nom::{
 };
 pub use number::number;
 
-fn metric(input: &str) -> IResult<&str, Metric, VerboseError<&str>> {
+fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
     context(
         "metric",
         map(tuple((metric_name, opt(labels))), |(name, labels)| {
             if let Some(labels) = labels {
-                Metric::with_labels(name, labels)
+                Sample::with_labels(name, labels)
             } else {
-                Metric::new(name)
+                Sample::new(name)
             }
         }),
     )(input)
@@ -38,11 +38,11 @@ mod test {
     use rstest::rstest;
 
     #[rstest]
-    #[case("up", Metric::new("up"))]
-    #[case(r#"up{job="prometheus"}"#, Metric::new("up").add_label("job", "prometheus"))]
-    #[case(r#"up{job="☃"}"#, Metric::new("up").add_label("job", "☃"))]
-    fn metric(#[case] input: &str, #[case] expected: Metric<'_>) {
-        let (rest, metric) = parse(super::metric, input);
+    #[case("up", Sample::new("up"))]
+    #[case(r#"up{job="prometheus"}"#, Sample::new("up").add_label("job", "prometheus"))]
+    #[case(r#"up{job="☃"}"#, Sample::new("up").add_label("job", "☃"))]
+    fn sample(#[case] input: &str, #[case] expected: Sample<'_>) {
+        let (rest, metric) = parse(super::sample, input);
 
         assert_eq!(expected, metric, "input: {input} metric: {metric:?}");
         assert!(rest.is_empty());

@@ -1,8 +1,8 @@
 mod label;
-mod metric;
 mod parser;
+mod sample;
 #[cfg(test)]
 mod test;
 
 pub use label::Label;
-pub use metric::Metric;
+pub use sample::Sample;
