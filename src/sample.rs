@@ -4,17 +4,26 @@ use crate::Label;
 pub struct Sample<'a> {
     name: &'a str,
     labels: Vec<Label<'a>>,
+    number: f64,
 }
 
 impl<'a> Sample<'a> {
-    pub fn new(name: &'a str) -> Self {
+    pub fn new(name: &'a str, number: f64) -> Self {
         let labels = vec![];
 
-        Self { name, labels }
+        Self {
+            name,
+            labels,
+            number,
+        }
     }
 
-    pub fn with_labels(name: &'a str, labels: Vec<Label<'a>>) -> Self {
-        Self { name, labels }
+    pub fn with_labels(name: &'a str, number: f64, labels: Vec<Label<'a>>) -> Self {
+        Self {
+            name,
+            labels,
+            number,
+        }
     }
 
     pub fn add_label(mut self, name: &'a str, value: &'a str) -> Self {

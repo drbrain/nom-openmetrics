@@ -1,13 +1,12 @@
+use crate::{parser::string, Label};
 use nom::{
-    bytes::complete::{tag, take_till, take_while, take_while1},
+    bytes::complete::{tag, take_while, take_while1},
     combinator::{map, recognize},
     error::{context, VerboseError},
     multi::separated_list0,
     sequence::{delimited, preceded, separated_pair},
     IResult,
 };
-
-use crate::Label;
 
 fn is_metric_label_start(c: char) -> bool {
     c.is_ascii_alphabetic() || c == '_'
@@ -36,7 +35,7 @@ pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
 
 // FIX: Does not parse escaped characters \", \\, \n
 fn label_value(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
-    delimited(tag("\""), take_till(|c| c == '"'), tag("\""))(input)
+    string(input)
 }
 
 /// Matches a metric name `[a-zA-Z_][a-zA-Z0-9_]*`

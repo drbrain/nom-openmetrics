@@ -6,11 +6,11 @@ use nom::{
     IResult,
 };
 
-fn is_metric_name_start(c: char) -> bool {
+fn is_metric_name_initial_char(c: char) -> bool {
     c.is_ascii_alphabetic() || c == '_' || c == ':'
 }
 
-fn is_metric_name_end(c: char) -> bool {
+pub fn is_metric_name_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || c == '_' || c == ':'
 }
 
@@ -19,8 +19,8 @@ pub fn metric_name(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
     context(
         "metric name",
         recognize(preceded(
-            take_while1(is_metric_name_start),
-            take_while(is_metric_name_end),
+            take_while1(is_metric_name_initial_char),
+            take_while(is_metric_name_char),
         )),
     )(input)
 }
