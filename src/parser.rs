@@ -18,6 +18,16 @@ pub use number::number;
 
 use self::metric_descriptor::metric_descriptor;
 
+/// Parses an OpenMetrics exposition
+///
+/// This must be terminated with `# EOF`.  See also [`set`]
+pub fn exposition(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
+    context(
+        "exposition",
+        terminated(set, tuple((tag("# EOF"), opt(tag("\n"))))),
+    )(input)
+}
+
 pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
     context(
         "family",
@@ -45,6 +55,13 @@ pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
             },
         ),
     )(input)
+}
+
+/// Parse a set of metrics
+///
+/// This format is more likely to match prometheus scrape targets
+pub fn set(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
+    context("set", many0(family))(input)
 }
 
 /// Matches a metric value
