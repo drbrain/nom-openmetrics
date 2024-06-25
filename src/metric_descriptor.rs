@@ -26,6 +26,14 @@ impl<'a> MetricDescriptor<'a> {
     pub fn unit(metric: &'a str, unit: &'a str) -> Self {
         Self::Unit { metric, unit }
     }
+
+    pub fn metric(&self) -> &'a str {
+        match self {
+            MetricDescriptor::Type { metric, .. }
+            | MetricDescriptor::Help { metric, .. }
+            | MetricDescriptor::Unit { metric, .. } => metric,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
