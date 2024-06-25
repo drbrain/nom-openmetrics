@@ -6,7 +6,7 @@ pub enum MetricDescriptor<'a> {
     },
     Help {
         metric: &'a str,
-        help: &'a str,
+        help: String,
     },
     Unit {
         metric: &'a str,
@@ -15,7 +15,7 @@ pub enum MetricDescriptor<'a> {
 }
 
 impl<'a> MetricDescriptor<'a> {
-    pub fn help(metric: &'a str, help: &'a str) -> Self {
+    pub fn help(metric: &'a str, help: String) -> Self {
         Self::Help { metric, help }
     }
 

@@ -34,7 +34,7 @@ pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
 }
 
 // FIX: Does not parse escaped characters \", \\, \n
-fn label_value(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
+fn label_value(input: &str) -> IResult<&str, String, VerboseError<&str>> {
     string(input)
 }
 
@@ -57,8 +57,8 @@ mod test {
     use rstest::rstest;
 
     #[rstest]
-    #[case(r#"job="prometheus""#, Label::new("job", "prometheus"))]
-    #[case(r#"job="☃""#, Label::new("job", "☃"))]
+    #[case(r#"job="prometheus""#, Label::new("job", "prometheus".into()))]
+    #[case(r#"job="☃""#, Label::new("job", "☃".into()))]
     fn label(#[case] input: &str, #[case] expected: Label<'_>) {
         use crate::test::parse;
 
@@ -69,7 +69,12 @@ mod test {
     }
 
     #[rstest]
-    #[case(r#"{job="prometheus",instance="scrape.example"}"#, vec![Label::new("job", "prometheus"), Label::new("instance", "scrape.example")])]
+    #[case(
+        r#"{job="prometheus",instance="scrape.example"}"#,
+        vec![
+            Label::new("job", "prometheus".into()),
+            Label::new("instance", "scrape.example".into())
+        ])]
     fn labels(#[case] input: &str, #[case] expected: Vec<Label<'_>>) {
         let (rest, labels) = parse(super::labels, input);
 

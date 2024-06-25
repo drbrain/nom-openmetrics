@@ -78,7 +78,7 @@ mod test {
 
     #[test]
     fn help_descriptor() {
-        let expected = MetricDescriptor::help("metric", "help text here");
+        let expected = MetricDescriptor::help("metric", "help text here".into());
         let input = "# HELP metric \"help text here\"\n";
 
         let (rest, descriptor) = parse(super::metric_descriptor, input);

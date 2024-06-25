@@ -26,8 +26,11 @@ impl<'a> Sample<'a> {
         }
     }
 
-    pub fn add_label(mut self, name: &'a str, value: &'a str) -> Self {
-        let label = Label { name, value };
+    pub fn add_label(mut self, name: &'a str, value: &str) -> Self {
+        let label = Label {
+            name,
+            value: value.into(),
+        };
 
         self.labels.push(label);
 

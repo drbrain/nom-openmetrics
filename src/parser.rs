@@ -128,7 +128,7 @@ mod test {
         let (rest, family) = parse(super::family, input);
 
         assert_eq!(
-            &MetricDescriptor::help("up", "up help text"),
+            &MetricDescriptor::help("up", "up help text".into()),
             family.descriptors.first().expect("parsed one descriptor")
         );
 
