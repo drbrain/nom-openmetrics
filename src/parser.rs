@@ -2,22 +2,23 @@ mod label;
 mod metric_descriptor;
 mod metric_name;
 mod number;
+mod string;
 
 use crate::{Family, Sample};
 pub use label::labels;
+use metric_descriptor::metric_descriptor;
 pub use metric_name::metric_name;
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_till},
+    bytes::complete::tag,
     combinator::{all_consuming, eof, map, opt},
     error::{context, VerboseError},
     multi::{many0, many1},
-    sequence::{delimited, preceded, terminated, tuple},
+    sequence::{preceded, terminated, tuple},
     IResult,
 };
 pub use number::number;
-
-use self::metric_descriptor::metric_descriptor;
+pub use string::string;
 
 fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
     context(
@@ -83,11 +84,6 @@ fn set(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
 /// Matches a metric value
 fn metric_value(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
     context("metric value", number)(input)
-}
-
-// FIX: Implement escaped-string
-pub fn string(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
-    delimited(tag("\""), take_till(|c| c == '"'), tag("\""))(input)
 }
 
 #[cfg(test)]
