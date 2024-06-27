@@ -9,7 +9,6 @@ pub use label::labels;
 use metric_descriptor::metric_descriptor;
 pub use metric_name::metric_name;
 use nom::{
-    branch::alt,
     bytes::complete::tag,
     combinator::{all_consuming, eof, map, opt},
     error::{context, VerboseError},
@@ -38,10 +37,7 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
     context(
         "family",
         map(
-            alt((
-                tuple((many0(metric_descriptor), many1(sample))),
-                tuple((many1(metric_descriptor), many0(sample))),
-            )),
+            tuple((many0(metric_descriptor), many1(sample))),
             |(descriptors, samples)| {
                 eprintln!("descriptors: {descriptors:?}");
                 eprintln!("samples: {samples:?}");
