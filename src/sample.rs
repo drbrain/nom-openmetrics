@@ -36,4 +36,16 @@ impl<'a> Sample<'a> {
 
         self
     }
+
+    pub fn labels(&self) -> &[Label<'a>] {
+        &self.labels
+    }
+
+    pub fn name(&self) -> &str {
+        self.name
+    }
+
+    pub fn number(&self) -> f64 {
+        self.number
+    }
 }
