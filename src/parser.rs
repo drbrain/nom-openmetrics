@@ -38,11 +38,7 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
         "family",
         map(
             tuple((many0(metric_descriptor), many1(sample))),
-            |(descriptors, samples)| {
-                eprintln!("descriptors: {descriptors:?}");
-                eprintln!("samples: {samples:?}");
-                Family::new(descriptors, samples)
-            },
+            |(descriptors, samples)| Family::new(descriptors, samples),
         ),
     )(input)
 }
