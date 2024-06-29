@@ -36,7 +36,7 @@ impl<'a> MetricDescriptor<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, strum::Display)]
 pub enum MetricType<'a> {
     Counter,
     Gauge,
@@ -45,5 +45,6 @@ pub enum MetricType<'a> {
     Info,
     Stateset,
     Summary,
+    #[strum(to_string = "{0}")]
     Unknown(&'a str),
 }
