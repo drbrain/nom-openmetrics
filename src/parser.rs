@@ -81,7 +81,7 @@ fn metric_value(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{test::parse, MetricDescriptor};
+    use crate::{test::parse, MetricDescriptor, MetricType};
     use rstest::rstest;
 
     #[rstest]
@@ -115,18 +115,28 @@ mod test {
 
     #[test]
     fn family() {
-        let input = "# HELP up \"up help text\"\nup{job=\"prometheus\"} 1\n";
+        let input = "# TYPE up gauge\n# HELP up \"up help text\"\nup{job=\"prometheus\"} 1\nup{job=\"grafana\"} 0\n";
 
         let (rest, family) = parse(super::family, input);
 
         assert_eq!(
-            &MetricDescriptor::help("up", "up help text".into()),
-            family.descriptors.first().expect("parsed one descriptor")
+            MetricDescriptor::r#type("up", MetricType::Gauge),
+            family.descriptors[0]
         );
 
         assert_eq!(
-            &Sample::new("up", 1.0).add_label("job", "prometheus"),
-            family.samples.first().expect("parsed one sample")
+            MetricDescriptor::help("up", "up help text".into()),
+            family.descriptors[1]
+        );
+
+        assert_eq!(
+            Sample::new("up", 1.0).add_label("job", "prometheus"),
+            family.samples[0]
+        );
+
+        assert_eq!(
+            Sample::new("up", 0.0).add_label("job", "grafana"),
+            family.samples[1]
         );
 
         assert!(rest.is_empty(), "leftover: {rest:?}");
