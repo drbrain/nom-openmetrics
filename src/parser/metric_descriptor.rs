@@ -46,7 +46,7 @@ fn help_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<
     map(
         tuple((
             preceded(tag("HELP "), metric_name),
-            preceded(char(' '), string),
+            preceded(char(' '), string::descriptor),
         )),
         |(metric, help)| MetricDescriptor::help(metric, help),
     )(input)

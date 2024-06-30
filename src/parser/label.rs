@@ -34,9 +34,8 @@ pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
     )(input)
 }
 
-// FIX: Does not parse escaped characters \", \\, \n
 fn label_value(input: &str) -> IResult<&str, String, VerboseError<&str>> {
-    delimited(char('"'), string, char('"'))(input)
+    string::label(input)
 }
 
 /// Matches a metric name `[a-zA-Z_][a-zA-Z0-9_]*`

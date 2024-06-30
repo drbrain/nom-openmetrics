@@ -3,9 +3,9 @@ use nom::{
     bytes::complete::is_not,
     character::complete::char,
     combinator::{map, value, verify},
-    error::VerboseError,
+    error::{context, VerboseError},
     multi::fold_many0,
-    sequence::preceded,
+    sequence::{delimited, preceded},
     IResult,
 };
 
@@ -15,15 +15,46 @@ enum Fragment<'a> {
     Escaped(char),
 }
 
-pub fn string(input: &str) -> IResult<&str, String, VerboseError<&str>> {
-    fold_many0(alt((escaped, normal)), String::new, |mut body, fragment| {
-        match fragment {
-            Fragment::Normal(normal) => body.push_str(normal),
-            Fragment::Escaped(escaped) => body.push(escaped),
-        }
+/// Parse a descriptor string which is not surrounded by quotes
+pub fn descriptor(input: &str) -> IResult<&str, String, VerboseError<&str>> {
+    context(
+        "descriptor string",
+        fold_many0(
+            alt((escaped, descriptor_normal)),
+            String::new,
+            |mut body, fragment| {
+                match fragment {
+                    Fragment::Normal(normal) => body.push_str(normal),
+                    Fragment::Escaped(escaped) => body.push(escaped),
+                }
 
-        body
-    })(input)
+                body
+            },
+        ),
+    )(input)
+}
+
+/// Parse a label string which includes surrounding quotes
+pub fn label(input: &str) -> IResult<&str, String, VerboseError<&str>> {
+    context(
+        "label string",
+        delimited(
+            char('"'),
+            fold_many0(
+                alt((escaped, label_normal)),
+                String::new,
+                |mut body, fragment| {
+                    match fragment {
+                        Fragment::Normal(normal) => body.push_str(normal),
+                        Fragment::Escaped(escaped) => body.push(escaped),
+                    }
+
+                    body
+                },
+            ),
+            char('"'),
+        ),
+    )(input)
 }
 
 fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
@@ -37,7 +68,14 @@ fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
     )(input)
 }
 
-fn normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
+fn descriptor_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
+    map(
+        verify(is_not("\\\n"), |s: &str| !s.is_empty()),
+        Fragment::Normal,
+    )(input)
+}
+
+fn label_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
     map(
         verify(is_not("\"\\\n"), |s: &str| !s.is_empty()),
         Fragment::Normal,
@@ -50,11 +88,25 @@ mod test {
 
     #[rstest]
     #[case(r#"hello world!"#, "hello world!")]
+    #[case(r#"hello "world!""#, "hello \"world!\"")]
     #[case(r#"\n"#, "\n")]
     #[case(r#"\\"#, "\\")]
     #[case(r#"\""#, "\"")]
-    fn string(#[case] input: &str, #[case] expected: &str) {
-        let (rest, result) = super::string(input).unwrap();
+    fn descriptor(#[case] input: &str, #[case] expected: &str) {
+        let (rest, result) = super::descriptor(input).unwrap();
+
+        assert_eq!(expected.to_string(), result);
+
+        assert!(rest.is_empty(), "leftover: {rest:?}");
+    }
+
+    #[rstest]
+    #[case(r#""hello world!""#, "hello world!")]
+    #[case(r#""\n""#, "\n")]
+    #[case(r#""\\""#, "\\")]
+    #[case(r#""\"""#, "\"")]
+    fn label(#[case] input: &str, #[case] expected: &str) {
+        let (rest, result) = super::label(input).unwrap();
 
         assert_eq!(expected.to_string(), result);
 

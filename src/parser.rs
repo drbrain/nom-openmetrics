@@ -18,7 +18,6 @@ use nom::{
     IResult,
 };
 pub use number::number;
-pub use string::string;
 
 fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
     context(
