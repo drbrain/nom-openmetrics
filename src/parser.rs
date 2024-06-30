@@ -13,7 +13,7 @@ use nom::{
     combinator::{all_consuming, eof, map, opt},
     error::{context, VerboseError},
     multi::{many0, many1},
-    sequence::{preceded, terminated, tuple},
+    sequence::{pair, preceded, terminated, tuple},
     IResult,
 };
 pub use number::number;
@@ -37,7 +37,7 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
     context(
         "family",
         map(
-            tuple((many0(metric_descriptor), many1(sample))),
+            pair(many0(metric_descriptor), many1(sample)),
             |(descriptors, samples)| Family::new(descriptors, samples),
         ),
     )(input)
@@ -95,7 +95,7 @@ mod test {
 
     #[test]
     fn exposition() {
-        let input = "# HELP up \"up help text\"\nup{job=\"prometheus\"} 1\n# EOF\n";
+        let input = "# HELP up up help text\nup{job=\"prometheus\"} 1\n# EOF\n";
 
         let (rest, exposition) = parse(super::exposition, input);
 
@@ -115,7 +115,7 @@ mod test {
 
     #[test]
     fn family() {
-        let input = "# TYPE up gauge\n# HELP up \"up help text\"\nup{job=\"prometheus\"} 1\nup{job=\"grafana\"} 0\n";
+        let input = "# TYPE up gauge\n# HELP up up help text\nup{job=\"prometheus\"} 1\nup{job=\"grafana\"} 0\n";
 
         let (rest, family) = parse(super::family, input);
 
@@ -155,7 +155,7 @@ mod test {
 
     #[test]
     fn prometheus() {
-        let input = "# HELP up \"up help text\"\nup{job=\"prometheus\"} 1\n";
+        let input = "# HELP up up help text\nup{job=\"prometheus\"} 1\n";
 
         let (rest, prometheus) = parse(super::prometheus, input);
 

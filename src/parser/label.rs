@@ -1,6 +1,7 @@
 use crate::{parser::string, Label};
 use nom::{
     bytes::complete::{tag, take_while, take_while1},
+    character::complete::char,
     combinator::{map, recognize},
     error::{context, VerboseError},
     multi::separated_list0,
@@ -35,7 +36,7 @@ pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
 
 // FIX: Does not parse escaped characters \", \\, \n
 fn label_value(input: &str) -> IResult<&str, String, VerboseError<&str>> {
-    string(input)
+    delimited(char('"'), string, char('"'))(input)
 }
 
 /// Matches a metric name `[a-zA-Z_][a-zA-Z0-9_]*`

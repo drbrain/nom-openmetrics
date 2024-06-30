@@ -1,11 +1,11 @@
 use nom::{
     branch::alt,
-    bytes::complete::{is_not, tag},
+    bytes::complete::is_not,
     character::complete::char,
     combinator::{map, value, verify},
     error::VerboseError,
     multi::fold_many0,
-    sequence::{delimited, preceded},
+    sequence::preceded,
     IResult,
 };
 
@@ -15,7 +15,7 @@ enum Fragment<'a> {
     Escaped(char),
 }
 
-fn body(input: &str) -> IResult<&str, String, VerboseError<&str>> {
+pub fn string(input: &str) -> IResult<&str, String, VerboseError<&str>> {
     fold_many0(alt((escaped, normal)), String::new, |mut body, fragment| {
         match fragment {
             Fragment::Normal(normal) => body.push_str(normal),
@@ -39,13 +39,9 @@ fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
 
 fn normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
     map(
-        verify(is_not("\"\\"), |s: &str| !s.is_empty()),
+        verify(is_not("\"\\\n"), |s: &str| !s.is_empty()),
         Fragment::Normal,
     )(input)
-}
-
-pub fn string(input: &str) -> IResult<&str, String, VerboseError<&str>> {
-    delimited(tag("\""), body, tag("\""))(input)
 }
 
 #[cfg(test)]
@@ -53,10 +49,10 @@ mod test {
     use rstest::rstest;
 
     #[rstest]
-    #[case(r#""hello""#, "hello")]
-    #[case(r#""\n""#, "\n")]
-    #[case(r#""\\""#, "\\")]
-    #[case(r#""\"""#, "\"")]
+    #[case(r#"hello world!"#, "hello world!")]
+    #[case(r#"\n"#, "\n")]
+    #[case(r#"\\"#, "\\")]
+    #[case(r#"\""#, "\"")]
     fn string(#[case] input: &str, #[case] expected: &str) {
         let (rest, result) = super::string(input).unwrap();
 

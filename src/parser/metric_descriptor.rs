@@ -78,9 +78,31 @@ mod test {
 
     #[test]
     fn help_descriptor() {
-        let expected = MetricDescriptor::help("metric", "help text here".into());
-        let input = "# HELP metric \"help text here\"\n";
+        let input = "HELP adsb_aircraft_mlat_recent Number of aircraft observed with a position determined by multilateration in the last minute";
 
+        let (rest, descriptor) = super::help_descriptor(input).unwrap();
+
+        let expected = 
+            MetricDescriptor::help(
+            "adsb_aircraft_mlat_recent", 
+            "Number of aircraft observed with a position determined by multilateration in the last minute".into()
+        );
+
+        assert_eq!(expected, descriptor);
+
+        assert!(rest.is_empty());
+    }
+
+    #[rstest]
+    #[case(
+        "# HELP up Job is scrapeable\n",
+        MetricDescriptor::help("up", "Job is scrapeable".into())
+    )]
+    #[case(
+        "# HELP adsb_aircraft_mlat_recent Number of aircraft observed with a position determined by multilateration in the last minute\n",
+        MetricDescriptor::help("adsb_aircraft_mlat_recent", "Number of aircraft observed with a position determined by multilateration in the last minute".into())
+    )]
+    fn metric_descriptor_help(#[case] input: &str, #[case] expected: MetricDescriptor) {
         let (rest, descriptor) = parse(super::metric_descriptor, input);
 
         assert_eq!(expected, descriptor);
@@ -93,7 +115,7 @@ mod test {
     #[case("gauge", MetricType::Gauge)]
     #[case("gaugehistogram", MetricType::Gaugehistogram)]
     #[case("junk", MetricType::Unknown("junk"))]
-    fn type_descriptor(#[case] input_type: &str, #[case] expected: MetricType) {
+    fn metric_descriptor_type(#[case] input_type: &str, #[case] expected: MetricType) {
         let expected = MetricDescriptor::r#type("metric", expected);
 
         let input = format!("# TYPE metric {input_type}\n");
@@ -106,7 +128,7 @@ mod test {
     }
 
     #[test]
-    fn unit_descriptor() {
+    fn metric_descriptor_unit() {
         let expected = MetricDescriptor::unit("metric", "unit");
         let input = "# UNIT metric unit\n";
 
