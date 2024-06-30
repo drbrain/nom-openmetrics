@@ -10,6 +10,7 @@ use metric_descriptor::metric_descriptor;
 pub use metric_name::metric_name;
 use nom::{
     bytes::complete::tag,
+    character::complete::char,
     combinator::{all_consuming, eof, map, opt},
     error::{context, VerboseError},
     multi::{many0, many1},
@@ -22,7 +23,7 @@ pub use string::string;
 fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
     context(
         "eof",
-        map(tuple((tag("# EOF"), opt(tag("\n")), eof)), |_| ()),
+        map(tuple((tag("# EOF"), opt(char('\n')), eof)), |_| ()),
     )(input)
 }
 
@@ -55,8 +56,8 @@ pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
         "sample",
         map(
             terminated(
-                tuple((metric_name, opt(labels), preceded(tag(" "), metric_value))),
-                tag("\n"),
+                tuple((metric_name, opt(labels), preceded(char(' '), metric_value))),
+                char('\n'),
             ),
             |(name, labels, number)| {
                 if let Some(labels) = labels {

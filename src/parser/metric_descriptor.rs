@@ -5,6 +5,7 @@ use crate::{
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until1, take_while},
+    character::complete::char,
     combinator::map,
     error::{context, VerboseError},
     sequence::{preceded, terminated, tuple},
@@ -20,7 +21,7 @@ pub fn metric_descriptor(input: &str) -> IResult<&str, MetricDescriptor, Verbose
             tag("# "),
             terminated(
                 alt((help_descriptor, type_descriptor, unit_descriptor)),
-                tag("\n"),
+                char('\n'),
             ),
         ),
     )(input)
@@ -45,7 +46,7 @@ fn help_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<
     map(
         tuple((
             preceded(tag("HELP "), metric_name),
-            preceded(tag(" "), string),
+            preceded(char(' '), string),
         )),
         |(metric, help)| MetricDescriptor::help(metric, help),
     )(input)
@@ -55,7 +56,7 @@ fn type_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<
     map(
         tuple((
             preceded(tag("TYPE "), metric_name),
-            preceded(tag(" "), metric_type),
+            preceded(char(' '), metric_type),
         )),
         |(metric, r#type)| MetricDescriptor::r#type(metric, r#type),
     )(input)
@@ -65,7 +66,7 @@ fn unit_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<
     map(
         tuple((
             preceded(tag("UNIT "), metric_name),
-            preceded(tag(" "), take_while(is_metric_name_char)),
+            preceded(char(' '), take_while(is_metric_name_char)),
         )),
         |(metric, unit)| MetricDescriptor::unit(metric, unit),
     )(input)
@@ -82,7 +83,7 @@ mod test {
 
         let (rest, descriptor) = super::help_descriptor(input).unwrap();
 
-        let expected = 
+        let expected =
             MetricDescriptor::help(
             "adsb_aircraft_mlat_recent", 
             "Number of aircraft observed with a position determined by multilateration in the last minute".into()

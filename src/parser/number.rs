@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
-    bytes::complete::{tag, tag_no_case},
-    character::complete::{digit0, digit1},
+    bytes::complete::tag_no_case,
+    character::complete::{char, digit0, digit1},
     combinator::{map, map_res, opt, recognize},
     error::{context, VerboseError},
     sequence::{terminated, tuple},
@@ -9,7 +9,7 @@ use nom::{
 };
 
 fn exponent(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
-    recognize(tuple((tag("e"), opt(sign), digit1)))(input)
+    recognize(tuple((char('e'), opt(sign), digit1)))(input)
 }
 
 fn infinity(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
@@ -44,10 +44,10 @@ fn real_number(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
                 alt((
                     recognize(tuple((
                         digit1,
-                        opt(terminated(tag("."), digit0)),
+                        opt(terminated(char('.'), digit0)),
                         opt(exponent),
                     ))),
-                    recognize(tuple((digit0, tag("."), digit1, opt(exponent)))),
+                    recognize(tuple((digit0, char('.'), digit1, opt(exponent)))),
                     digit1,
                 )),
                 |digits: &str| digits.parse::<f64>(),
@@ -58,9 +58,9 @@ fn real_number(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
 }
 
 fn sign(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
-    map(alt((tag("-"), tag("+"))), |sign| match sign {
-        "-" => -1.0,
-        "+" => 1.0,
+    map(alt((char('-'), char('+'))), |sign| match sign {
+        '-' => -1.0,
+        '+' => 1.0,
         _ => unreachable!(),
     })(input)
 }

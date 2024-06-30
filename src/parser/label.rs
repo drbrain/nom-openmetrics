@@ -1,6 +1,6 @@
 use crate::{parser::string, Label};
 use nom::{
-    bytes::complete::{tag, take_while, take_while1},
+    bytes::complete::{take_while, take_while1},
     character::complete::char,
     combinator::{map, recognize},
     error::{context, VerboseError},
@@ -21,7 +21,7 @@ pub fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
     context(
         "label",
         map(
-            separated_pair(metric_label, tag("="), label_value),
+            separated_pair(metric_label, char('='), label_value),
             |(name, value)| Label { name, value },
         ),
     )(input)
@@ -30,7 +30,7 @@ pub fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
 pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
     context(
         "labels",
-        delimited(tag("{"), separated_list0(tag(","), label), tag("}")),
+        delimited(char('{'), separated_list0(char(','), label), char('}')),
     )(input)
 }
 
