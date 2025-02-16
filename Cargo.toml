@@ -13,3 +13,7 @@ strum = { version = "0.27", features = ["derive"] }
 [dev-dependencies]
 assert_float_eq = "1.1.4"
 rstest = "0.24.0"
+
+[[example]]
+name = "parse"
+crate-type = ["bin"]
