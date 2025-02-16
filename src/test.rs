@@ -1,12 +1,10 @@
-use nom::{
-    error::{convert_error, VerboseError},
-    Parser,
-};
+use nom::Parser;
+use nom_language::error::{convert_error, VerboseError};
 
 #[track_caller]
 pub fn parse<'a, O, F>(mut parser: F, input: &'a str) -> (&'a str, O)
 where
-    F: Parser<&'a str, O, VerboseError<&'a str>>,
+    F: Parser<&'a str, Output = O, Error = VerboseError<&'a str>>,
 {
     let result = parser.parse(input);
 

@@ -1,16 +1,14 @@
 use nom::{
     branch::alt,
     bytes::complete::tag_no_case,
-    character::complete::{char, digit0, digit1},
-    combinator::{map, map_res, opt, recognize},
-    error::{context, VerboseError},
-    sequence::{terminated, tuple},
-    IResult,
+    character::complete::char,
+    combinator::{map, map_res, opt},
+    error::context,
+    number::complete::recognize_float,
+    sequence::terminated,
+    IResult, Parser,
 };
-
-fn exponent(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
-    recognize(tuple((char('e'), opt(sign), digit1)))(input)
-}
+use nom_language::error::VerboseError;
 
 fn infinity(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
     context(
@@ -25,36 +23,20 @@ fn infinity(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
                 f64::INFINITY * sign.unwrap_or(1.0)
             },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn nan(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
-    map(tag_no_case("nan"), |_| f64::NAN)(input)
+    map(tag_no_case("nan"), |_| f64::NAN).parse(input)
 }
 
 pub fn number(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
-    context("number", alt((real_number, infinity, nan)))(input)
+    context("number", alt((real_number, infinity, nan))).parse(input)
 }
 
 fn real_number(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
-    map(
-        tuple((
-            opt(sign),
-            map_res(
-                alt((
-                    recognize(tuple((
-                        digit1,
-                        opt(terminated(char('.'), digit0)),
-                        opt(exponent),
-                    ))),
-                    recognize(tuple((digit0, char('.'), digit1, opt(exponent)))),
-                    digit1,
-                )),
-                |digits: &str| digits.parse::<f64>(),
-            ),
-        )),
-        |(sign, digits)| sign.unwrap_or(1.0) * digits,
-    )(input)
+    map_res(recognize_float, |float: &str| float.parse::<f64>()).parse(input)
 }
 
 fn sign(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
@@ -62,7 +44,8 @@ fn sign(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
         '-' => -1.0,
         '+' => 1.0,
         _ => unreachable!(),
-    })(input)
+    })
+    .parse(input)
 }
 
 #[cfg(test)]
@@ -70,18 +53,6 @@ mod test {
     use crate::test::parse;
     use assert_float_eq::*;
     use rstest::rstest;
-
-    #[rstest]
-    #[case("e+0", "e+0")]
-    #[case("e-0", "e-0")]
-    #[case("e0", "e0")]
-    #[case("e+12345", "e+12345")]
-    fn exponent(#[case] input: &str, #[case] expected: &str) {
-        let (rest, result) = parse(super::exponent, input);
-
-        assert_eq!(expected, result);
-        assert!(rest.is_empty());
-    }
 
     #[rstest]
     #[case("+Inf", f64::INFINITY)]
@@ -139,10 +110,12 @@ mod test {
     #[case("3e-5", 0.00003)]
     #[case(".456", 0.456)]
     #[case(".1e-2", 0.001)]
+    #[case("0.567", 0.567)]
+    #[case("0.5e-8", 0.000000005)]
     fn number(#[case] input: &str, #[case] expected: f64) {
         let (rest, result) = parse(super::number, input);
 
+        assert!(rest.is_empty(), "unparsed input (result: {result})");
         assert_float_relative_eq!(expected, result, 0.01);
-        assert!(rest.is_empty(), "unparsed input");
     }
 }

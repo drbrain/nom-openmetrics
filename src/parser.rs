@@ -12,25 +12,23 @@ use nom::{
     bytes::complete::tag,
     character::complete::char,
     combinator::{all_consuming, eof, map, opt},
-    error::{context, VerboseError},
+    error::context,
     multi::{many0, many1},
-    sequence::{pair, preceded, terminated, tuple},
-    IResult,
+    sequence::{pair, preceded, terminated},
+    IResult, Parser,
 };
+use nom_language::error::VerboseError;
 pub use number::number;
 
 fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
-    context(
-        "eof",
-        map(tuple((tag("# EOF"), opt(char('\n')), eof)), |_| ()),
-    )(input)
+    context("eof", map((tag("# EOF"), opt(char('\n')), eof), |_| ())).parse(input)
 }
 
 /// Parses an OpenMetrics exposition
 ///
 /// This must be terminated with `# EOF`.  See also [`set`]
 pub fn exposition(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
-    context("exposition", terminated(set, eof_marker))(input)
+    context("exposition", terminated(set, eof_marker)).parse(input)
 }
 
 pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
@@ -40,14 +38,15 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
             pair(many0(metric_descriptor), many1(sample)),
             |(descriptors, samples)| Family::new(descriptors, samples),
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 /// Parse a set of metrics
 ///
 /// This format is more likely to match prometheus scrape targets
 pub fn prometheus(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
-    context("prometheus", all_consuming(terminated(many0(family), eof)))(input)
+    context("prometheus", all_consuming(terminated(many0(family), eof))).parse(input)
 }
 
 pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
@@ -55,7 +54,7 @@ pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
         "sample",
         map(
             terminated(
-                tuple((metric_name, opt(labels), preceded(char(' '), metric_value))),
+                (metric_name, opt(labels), preceded(char(' '), metric_value)),
                 char('\n'),
             ),
             |(name, labels, number)| {
@@ -66,16 +65,17 @@ pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
                 }
             },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn set(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
-    context("set", many0(family))(input)
+    context("set", many0(family)).parse(input)
 }
 
 /// Matches a metric value
 fn metric_value(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
-    context("metric value", number)(input)
+    context("metric value", number).parse(input)
 }
 
 #[cfg(test)]

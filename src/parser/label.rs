@@ -3,11 +3,12 @@ use nom::{
     bytes::complete::{take_while, take_while1},
     character::complete::char,
     combinator::{map, recognize},
-    error::{context, VerboseError},
+    error::context,
     multi::separated_list0,
     sequence::{delimited, preceded, separated_pair},
-    IResult,
+    IResult, Parser,
 };
+use nom_language::error::VerboseError;
 
 fn is_metric_label_start(c: char) -> bool {
     c.is_ascii_alphabetic() || c == '_'
@@ -24,14 +25,16 @@ pub fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
             separated_pair(metric_label, char('='), label_value),
             |(name, value)| Label { name, value },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
     context(
         "labels",
         delimited(char('{'), separated_list0(char(','), label), char('}')),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn label_value(input: &str) -> IResult<&str, String, VerboseError<&str>> {
@@ -46,14 +49,15 @@ fn metric_label(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
             take_while1(is_metric_label_start),
             take_while(is_metric_label_end),
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::test::parse;
-    use nom::error::VerboseErrorKind;
+    use nom_language::error::VerboseErrorKind;
     use rstest::rstest;
 
     #[rstest]

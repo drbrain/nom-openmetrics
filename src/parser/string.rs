@@ -3,11 +3,12 @@ use nom::{
     bytes::complete::is_not,
     character::complete::char,
     combinator::{map, value, verify},
-    error::{context, VerboseError},
+    error::context,
     multi::fold_many0,
     sequence::{delimited, preceded},
-    IResult,
+    IResult, Parser,
 };
+use nom_language::error::VerboseError;
 
 #[derive(Clone)]
 enum Fragment<'a> {
@@ -31,7 +32,8 @@ pub fn descriptor(input: &str) -> IResult<&str, String, VerboseError<&str>> {
                 body
             },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 /// Parse a label string which includes surrounding quotes
@@ -54,7 +56,8 @@ pub fn label(input: &str) -> IResult<&str, String, VerboseError<&str>> {
             ),
             char('"'),
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
@@ -65,21 +68,24 @@ fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
             value(Fragment::Escaped('\"'), char('"')),
             value(Fragment::Escaped('\\'), char('\\')),
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn descriptor_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
     map(
         verify(is_not("\\\n"), |s: &str| !s.is_empty()),
         Fragment::Normal,
-    )(input)
+    )
+    .parse(input)
 }
 
 fn label_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
     map(
         verify(is_not("\"\\\n"), |s: &str| !s.is_empty()),
         Fragment::Normal,
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]

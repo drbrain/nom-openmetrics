@@ -1,10 +1,11 @@
 use nom::{
     bytes::complete::{take_while, take_while1},
     combinator::recognize,
-    error::{context, VerboseError},
+    error::context,
     sequence::preceded,
-    IResult,
+    IResult, Parser,
 };
+use nom_language::error::VerboseError;
 
 fn is_metric_name_initial_char(c: char) -> bool {
     c.is_ascii_alphabetic() || c == '_' || c == ':'
@@ -22,14 +23,15 @@ pub fn metric_name(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
             take_while1(is_metric_name_initial_char),
             take_while(is_metric_name_char),
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::test::parse;
-    use nom::error::VerboseErrorKind;
+    use nom_language::error::VerboseErrorKind;
     use rstest::rstest;
 
     #[test]

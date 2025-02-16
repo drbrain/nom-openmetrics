@@ -7,10 +7,11 @@ use nom::{
     bytes::complete::{tag, take_until1, take_while},
     character::complete::char,
     combinator::map,
-    error::{context, VerboseError},
-    sequence::{preceded, terminated, tuple},
-    IResult,
+    error::context,
+    sequence::{preceded, terminated},
+    IResult, Parser,
 };
+use nom_language::error::VerboseError;
 
 use super::metric_name::is_metric_name_char;
 
@@ -24,7 +25,8 @@ pub fn metric_descriptor(input: &str) -> IResult<&str, MetricDescriptor, Verbose
                 char('\n'),
             ),
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn metric_type(input: &str) -> IResult<&str, MetricType, VerboseError<&str>> {
@@ -39,37 +41,41 @@ fn metric_type(input: &str) -> IResult<&str, MetricType, VerboseError<&str>> {
             map(tag("summary"), |_| MetricType::Summary),
             map(take_until1("\n"), MetricType::Unknown),
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn help_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
     map(
-        tuple((
+        (
             preceded(tag("HELP "), metric_name),
             preceded(char(' '), string::descriptor),
-        )),
+        ),
         |(metric, help)| MetricDescriptor::help(metric, help),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn type_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
     map(
-        tuple((
+        (
             preceded(tag("TYPE "), metric_name),
             preceded(char(' '), metric_type),
-        )),
+        ),
         |(metric, r#type)| MetricDescriptor::r#type(metric, r#type),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn unit_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
     map(
-        tuple((
+        (
             preceded(tag("UNIT "), metric_name),
             preceded(char(' '), take_while(is_metric_name_char)),
-        )),
+        ),
         |(metric, unit)| MetricDescriptor::unit(metric, unit),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[cfg(test)]
