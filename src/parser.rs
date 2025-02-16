@@ -27,8 +27,8 @@ fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
 /// Parses an OpenMetrics exposition
 ///
 /// This must be terminated with `# EOF`.  See also [`set`]
-pub fn exposition(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
-    context("exposition", terminated(set, eof_marker)).parse(input)
+pub fn openmetrics(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
+    context("openmetrics", terminated(set, eof_marker)).parse(input)
 }
 
 pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
@@ -98,14 +98,14 @@ mod test {
     }
 
     #[test]
-    fn exposition() {
+    fn openmetrics() {
         let input = "# HELP up up help text\nup{job=\"prometheus\"} 1\n# EOF\n";
 
-        let (rest, exposition) = parse(super::exposition, input);
+        let (rest, openmetrics) = parse(super::openmetrics, input);
 
         assert_eq!(
             "up",
-            exposition
+            openmetrics
                 .first()
                 .expect("parsed one family")
                 .descriptors
