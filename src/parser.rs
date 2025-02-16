@@ -11,7 +11,7 @@ pub use metric_name::metric_name;
 use nom::{
     bytes::complete::tag,
     character::complete::char,
-    combinator::{all_consuming, eof, map, opt},
+    combinator::{all_consuming, cut, eof, map, opt},
     error::context,
     multi::{many0, many1},
     sequence::{pair, preceded, terminated},
@@ -46,7 +46,11 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
 ///
 /// This format is more likely to match prometheus scrape targets
 pub fn prometheus(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
-    context("prometheus", all_consuming(terminated(many0(family), eof))).parse(input)
+    context(
+        "prometheus",
+        all_consuming(terminated(many0(family), cut(eof))),
+    )
+    .parse(input)
 }
 
 pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
