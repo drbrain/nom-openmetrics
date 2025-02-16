@@ -5,9 +5,9 @@ mod number;
 mod string;
 
 use crate::{Family, Sample};
-pub use label::labels;
+use label::labels;
 use metric_descriptor::metric_descriptor;
-pub use metric_name::metric_name;
+use metric_name::metric_name;
 use nom::{
     bytes::complete::tag,
     character::complete::char,
@@ -18,20 +18,21 @@ use nom::{
     IResult, Parser,
 };
 use nom_language::error::VerboseError;
-pub use number::number;
+use number::number;
 
 fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
     context("eof", map((tag("# EOF"), opt(char('\n')), eof), |_| ())).parse(input)
 }
 
-/// Parses an OpenMetrics exposition
+/// Parse an OpenMetrics-format exposition
 ///
-/// This must be terminated with `# EOF`.  See also [`set`]
+/// This must be terminated with `# EOF`.  See also [`prometheus`]
 pub fn openmetrics(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
     context("openmetrics", terminated(set, eof_marker)).parse(input)
 }
 
-pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
+/// Parse a family of metrics
+pub(crate) fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
     context(
         "family",
         map(
@@ -42,7 +43,7 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
     .parse(input)
 }
 
-/// Parse a set of metrics
+/// Parse a Prometheus-format exposition
 ///
 /// This format is more likely to match prometheus scrape targets
 pub fn prometheus(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
@@ -53,7 +54,8 @@ pub fn prometheus(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>>
     .parse(input)
 }
 
-pub fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
+/// Parse a single metric sample
+pub(crate) fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
     context(
         "sample",
         map(

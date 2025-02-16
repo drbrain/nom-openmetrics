@@ -11,12 +11,12 @@ fn is_metric_name_initial_char(c: char) -> bool {
     c.is_ascii_alphabetic() || c == '_' || c == ':'
 }
 
-pub fn is_metric_name_char(c: char) -> bool {
+pub(crate) fn is_metric_name_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || c == '_' || c == ':'
 }
 
-/// Matches a metric name `[a-zA-Z_:][a-zA-Z0-9_:]*`
-pub fn metric_name(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
+/// Parse a metric name: `[a-zA-Z_:][a-zA-Z0-9_:]*`
+pub(crate) fn metric_name(input: &str) -> IResult<&str, &str, VerboseError<&str>> {
     context(
         "metric name",
         recognize(preceded(

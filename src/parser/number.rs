@@ -31,7 +31,8 @@ fn nan(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
     map(tag_no_case("nan"), |_| f64::NAN).parse(input)
 }
 
-pub fn number(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
+/// Parse a number
+pub(crate) fn number(input: &str) -> IResult<&str, f64, VerboseError<&str>> {
     context("number", alt((real_number, infinity, nan))).parse(input)
 }
 

@@ -18,7 +18,8 @@ fn is_metric_label_end(c: char) -> bool {
     c.is_ascii_alphanumeric() || c == '_'
 }
 
-pub fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
+/// Parse a `Label` for a metric
+pub(crate) fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
     context(
         "label",
         map(
@@ -29,7 +30,8 @@ pub fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
     .parse(input)
 }
 
-pub fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
+/// Parse `Label`s for a metric
+pub(crate) fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
     context(
         "labels",
         delimited(char('{'), separated_list0(char(','), label), char('}')),

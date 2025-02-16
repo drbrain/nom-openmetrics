@@ -1,9 +1,15 @@
 [package]
 name = "nom-openmetrics"
+description = "A prometheus and openmetrics parser"
 version = "0.1.0"
-edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+categories = ["parser-implementations"]
+documuntation = "https://docs.rs/nom-openmetrics"
+edition = "2021"
+keywords = ["parser", "openmetrics", "prometheus", "nom"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/drbrain/nom-openmetrics"
 
 [dependencies]
 nom = "8"

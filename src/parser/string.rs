@@ -17,7 +17,7 @@ enum Fragment<'a> {
 }
 
 /// Parse a descriptor string which is not surrounded by quotes
-pub fn descriptor(input: &str) -> IResult<&str, String, VerboseError<&str>> {
+pub(crate) fn descriptor(input: &str) -> IResult<&str, String, VerboseError<&str>> {
     context(
         "descriptor string",
         fold_many0(
@@ -37,7 +37,7 @@ pub fn descriptor(input: &str) -> IResult<&str, String, VerboseError<&str>> {
 }
 
 /// Parse a label string which includes surrounding quotes
-pub fn label(input: &str) -> IResult<&str, String, VerboseError<&str>> {
+pub(crate) fn label(input: &str) -> IResult<&str, String, VerboseError<&str>> {
     context(
         "label string",
         delimited(

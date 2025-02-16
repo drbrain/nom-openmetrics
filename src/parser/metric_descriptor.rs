@@ -15,7 +15,9 @@ use nom_language::error::VerboseError;
 
 use super::metric_name::is_metric_name_char;
 
-pub fn metric_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
+pub(crate) fn metric_descriptor(
+    input: &str,
+) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
     context(
         "metric decriptor",
         preceded(
