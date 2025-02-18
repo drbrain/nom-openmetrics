@@ -4,7 +4,7 @@ description = "A prometheus and openmetrics parser"
 version = "0.1.0"
 
 categories = ["parser-implementations"]
-documuntation = "https://docs.rs/nom-openmetrics"
+documentation = "https://docs.rs/nom-openmetrics"
 edition = "2021"
 keywords = ["parser", "openmetrics", "prometheus", "nom"]
 license = "MIT"
