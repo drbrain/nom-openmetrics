@@ -1,3 +1,16 @@
+//! # Prometheus and OpenMetrics parsing functions
+//!
+//! Use [`prometheus()`] and [`openmetrics()`] to parse an entire exposition (set of metrics).  These
+//! are best used when you can fit the entire parsed exposition in memory.
+//!
+//! Use [`family()`] to parse a chunk of an exposition.  This is best used when you are streaming
+//! an exposition.  If the result is an error you will need to fill the input buffer and retry, and
+//! check for EOF with either `eof_marker()` (OpenMetrics) or [`eof()`](nom::combinator::eof())
+//! (Prometheus).
+//!
+//! Use [`eof_marker()`] to detect the end of an OpenMetrics-format exposition you are consuming
+//! with `family()`.
+
 mod label;
 mod metric_descriptor;
 mod metric_name;
@@ -20,7 +33,8 @@ use nom::{
 use nom_language::error::VerboseError;
 use number::number;
 
-fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
+/// An OpenMetrics EOF marker
+pub fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
     context("eof", map((tag("# EOF"), opt(char('\n')), eof), |_| ())).parse(input)
 }
 
@@ -31,8 +45,8 @@ pub fn openmetrics(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>
     context("openmetrics", terminated(set, eof_marker)).parse(input)
 }
 
-/// Parse a family of metrics
-pub(crate) fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
+/// Parse a [`Family`] of metrics
+pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
     context(
         "family",
         map(
@@ -47,11 +61,7 @@ pub(crate) fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
 ///
 /// This format is more likely to match prometheus scrape targets
 pub fn prometheus(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
-    context(
-        "prometheus",
-        all_consuming(terminated(many0(family), cut(eof))),
-    )
-    .parse(input)
+    context("prometheus", all_consuming(terminated(set, cut(eof)))).parse(input)
 }
 
 /// Parse a single metric sample

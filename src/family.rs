@@ -1,6 +1,6 @@
 use crate::{MetricDescriptor, Sample};
 
-/// A set of metric `Sample`s
+/// A metric's [descriptor](MetricDescriptor)s and its set of [`Sample`]s
 #[derive(Debug, PartialEq)]
 pub struct Family<'a> {
     pub descriptors: Vec<MetricDescriptor<'a>>,
