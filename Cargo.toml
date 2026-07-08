@@ -14,7 +14,7 @@ repository = "https://github.com/drbrain/nom-openmetrics"
 [dependencies]
 nom = "8"
 nom-language = "0.1.0"
-strum = { version = "0.27", features = ["derive"] }
+strum = { version = "0.28", features = ["derive"] }
 
 [dev-dependencies]
 assert_float_eq = "1.1.4"
