@@ -17,7 +17,7 @@ nom-language = "0.1.0"
 strum = { version = "0.28", features = ["derive"] }
 
 [dev-dependencies]
-assert_float_eq = "1.1.4"
+assert_float_eq = "1.2"
 rstest = "0.26.1"
 
 [[example]]
