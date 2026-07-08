@@ -41,12 +41,12 @@ pub fn eof_marker(input: &str) -> IResult<&str, (), VerboseError<&str>> {
 /// Parse an OpenMetrics-format exposition
 ///
 /// This must be terminated with `# EOF`.  See also [`prometheus`]
-pub fn openmetrics(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
+pub fn openmetrics(input: &str) -> IResult<&str, Vec<Family<'_>>, VerboseError<&str>> {
     context("openmetrics", terminated(set, eof_marker)).parse(input)
 }
 
 /// Parse a [`Family`] of metrics
-pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
+pub fn family(input: &str) -> IResult<&str, Family<'_>, VerboseError<&str>> {
     context(
         "family",
         map(
@@ -60,12 +60,12 @@ pub fn family(input: &str) -> IResult<&str, Family, VerboseError<&str>> {
 /// Parse a Prometheus-format exposition
 ///
 /// This format is more likely to match prometheus scrape targets
-pub fn prometheus(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
+pub fn prometheus(input: &str) -> IResult<&str, Vec<Family<'_>>, VerboseError<&str>> {
     context("prometheus", all_consuming(terminated(set, cut(eof)))).parse(input)
 }
 
 /// Parse a single metric sample
-pub(crate) fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
+pub(crate) fn sample(input: &str) -> IResult<&str, Sample<'_>, VerboseError<&str>> {
     context(
         "sample",
         map(
@@ -85,7 +85,7 @@ pub(crate) fn sample(input: &str) -> IResult<&str, Sample, VerboseError<&str>> {
     .parse(input)
 }
 
-fn set(input: &str) -> IResult<&str, Vec<Family>, VerboseError<&str>> {
+fn set(input: &str) -> IResult<&str, Vec<Family<'_>>, VerboseError<&str>> {
     context("set", many0(family)).parse(input)
 }
 

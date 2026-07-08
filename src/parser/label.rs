@@ -19,7 +19,7 @@ fn is_metric_label_end(c: char) -> bool {
 }
 
 /// Parse a `Label` for a metric
-pub(crate) fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
+pub(crate) fn label(input: &str) -> IResult<&str, Label<'_>, VerboseError<&str>> {
     context(
         "label",
         map(
@@ -31,7 +31,7 @@ pub(crate) fn label(input: &str) -> IResult<&str, Label, VerboseError<&str>> {
 }
 
 /// Parse `Label`s for a metric
-pub(crate) fn labels(input: &str) -> IResult<&str, Vec<Label>, VerboseError<&str>> {
+pub(crate) fn labels(input: &str) -> IResult<&str, Vec<Label<'_>>, VerboseError<&str>> {
     context(
         "labels",
         delimited(char('{'), separated_list0(char(','), label), char('}')),

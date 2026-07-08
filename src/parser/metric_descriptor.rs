@@ -17,7 +17,7 @@ use super::metric_name::is_metric_name_char;
 
 pub(crate) fn metric_descriptor(
     input: &str,
-) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
+) -> IResult<&str, MetricDescriptor<'_>, VerboseError<&str>> {
     context(
         "metric decriptor",
         preceded(
@@ -31,7 +31,7 @@ pub(crate) fn metric_descriptor(
     .parse(input)
 }
 
-fn metric_type(input: &str) -> IResult<&str, MetricType, VerboseError<&str>> {
+fn metric_type(input: &str) -> IResult<&str, MetricType<'_>, VerboseError<&str>> {
     context(
         "metric type",
         alt((
@@ -47,7 +47,7 @@ fn metric_type(input: &str) -> IResult<&str, MetricType, VerboseError<&str>> {
     .parse(input)
 }
 
-fn help_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
+fn help_descriptor(input: &str) -> IResult<&str, MetricDescriptor<'_>, VerboseError<&str>> {
     map(
         (
             preceded(tag("HELP "), metric_name),
@@ -58,7 +58,7 @@ fn help_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<
     .parse(input)
 }
 
-fn type_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
+fn type_descriptor(input: &str) -> IResult<&str, MetricDescriptor<'_>, VerboseError<&str>> {
     map(
         (
             preceded(tag("TYPE "), metric_name),
@@ -69,7 +69,7 @@ fn type_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<
     .parse(input)
 }
 
-fn unit_descriptor(input: &str) -> IResult<&str, MetricDescriptor, VerboseError<&str>> {
+fn unit_descriptor(input: &str) -> IResult<&str, MetricDescriptor<'_>, VerboseError<&str>> {
     map(
         (
             preceded(tag("UNIT "), metric_name),

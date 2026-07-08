@@ -63,7 +63,7 @@ pub(crate) fn label(input: &str) -> IResult<&str, String, VerboseError<&str>> {
     .parse(input)
 }
 
-fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
+fn escaped(input: &str) -> IResult<&str, Fragment<'_>, VerboseError<&str>> {
     preceded(
         char('\\'),
         alt((
@@ -76,7 +76,7 @@ fn escaped(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
     .parse(input)
 }
 
-fn descriptor_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
+fn descriptor_normal(input: &str) -> IResult<&str, Fragment<'_>, VerboseError<&str>> {
     map(
         verify(is_not("\\\n"), |s: &str| !s.is_empty()),
         Fragment::Normal,
@@ -84,7 +84,7 @@ fn descriptor_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>>
     .parse(input)
 }
 
-fn label_normal(input: &str) -> IResult<&str, Fragment, VerboseError<&str>> {
+fn label_normal(input: &str) -> IResult<&str, Fragment<'_>, VerboseError<&str>> {
     map(
         verify(is_not("\"\\\n"), |s: &str| !s.is_empty()),
         Fragment::Normal,
