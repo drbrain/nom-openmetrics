@@ -1,7 +1,7 @@
 [package]
 name = "nom-openmetrics"
 description = "A prometheus and openmetrics parser"
-version = "0.2.0"
+version = "0.3.0"
 
 categories = ["parser-implementations"]
 documentation = "https://docs.rs/nom-openmetrics"

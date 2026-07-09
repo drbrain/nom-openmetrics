@@ -125,7 +125,7 @@ dependencies = [
 
 [[package]]
 name = "nom-openmetrics"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "assert_float_eq",
  "nom",
